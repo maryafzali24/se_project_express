@@ -8,6 +8,9 @@ const clothingItem = new mongoose.Schema({
     maxlength: 30,
     required: true,
   },
+
+  // weather — a required string that describes the weather type.
+  // Make sure it matches the weather type you defined in your React app ('hot', 'warm', and'cold'). Use the enum validator to implement the field.
   weather: {
     type: String,
     required: true,
@@ -18,24 +21,31 @@ const clothingItem = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => validator.isURL(v),
-      message: "Link user input is invalid",
+      message: "You must enter a valid URL",
     },
   },
-  // owner: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "user",
-  //   required: true,
-  // },
+  // owner — a link to the item author's model of the ObjectId type
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: "Url  cannot be empty",
+  },
+  // a list of users who liked the item, an ObjectId array with a reference to the user modal (empty by default)
   // likes: [
   //   {
   //     type: mongoose.Schema.Types.ObjectId,
   //     ref: "user",
   //   },
   // ],
-  // createdAt: {
-  //   type: Date,
-  //   default: Date.now,
-  // },
+  likes: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    default: [],
+  },
+  // createdAt — the item creation date, a field with the Date type and the default value Date.now
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("clothingItems", clothingItem);
