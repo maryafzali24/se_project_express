@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
@@ -12,10 +11,9 @@ const createItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, likes, owner: req.user._id })
     .then((item) => {
-      res.status(201).res.send({ data: item });
+      res.status(201).send({ data: item });
     })
     .catch((err) => {
-      console.log(err);
       if (err.name === "ValidationError")
         return res
           .status(BAD_REQUEST)
@@ -27,32 +25,30 @@ const createItem = (req, res) => {
 };
 
 const getItems = (req, res) => {
-  clothingItem
-    .find({})
-    .then((item) => res.status(200).send(item))
+  ClothingItem.find({})
+    .then((item) => res.send(item))
     .catch((e) => {
       res.status(DEFAULT).send({ message: "Error from getItems", e });
     });
 };
 
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageURL } = req.body;
-  clothingItem
-    .findByIdAndUpdate(itemId, { $set: { imageURL } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      res.status(500).send({ message: " Error from updateItem", e });
-    });
-};
+// const updateItem = (req, res) => {
+//   const { itemId } = req.params;
+//   const { imageURL } = req.body;
+//   clothingItem
+//     .findByIdAndUpdate(itemId, { $set: { imageURL } })
+//     .orFail()
+//     .then((item) => res.status(200).send({ data: item }))
+//     .catch((e) => {
+//       res.status(500).send({ message: " Error from updateItem", e });
+//     });
+// };
 
 const deleteItem = (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
-  console.log(itemId);
-  clothingItem
-    .findByIdAndDelete(itemId)
+
+  ClothingItem.findByIdAndDelete(itemId)
     .orFail()
     .then((item) => {
       if (!item.owner.equals(userId)) {
@@ -65,7 +61,6 @@ const deleteItem = (req, res) => {
         .then(() => res.send({ message: "The item deleted" }));
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
         return res
           .status(BAD_REQUEST)
@@ -83,8 +78,6 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
-  console.log("itemId:", itemId);
-  console.log("userId:", userId);
 
   ClothingItem.findByIdAndUpdate(
     itemId,
@@ -94,7 +87,6 @@ const likeItem = (req, res) => {
     .orFail()
     .then((item) => res.send({ data: item }))
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
         return res
           .status(BAD_REQUEST)
@@ -120,7 +112,6 @@ const dislikeItem = (req, res) => {
     .orFail()
     .then((item) => res.send({ data: item }))
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
         return res
           .status(BAD_REQUEST)
@@ -140,7 +131,6 @@ const dislikeItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,
