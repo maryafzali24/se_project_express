@@ -1,7 +1,7 @@
 const { JWT_SECRET } = require("../utils/config");
 const { UNAUTHORIZED } = require("../utils/errors");
 
-module.exports = (req, res, next) => {
+const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   // let's check the header exists and starts with 'Bearer '
@@ -23,3 +23,4 @@ module.exports = (req, res, next) => {
 
   next(); // sending the request to the next middleware
 };
+module.exports = { auth };

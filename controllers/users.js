@@ -7,6 +7,7 @@ const {
   DEFAULT,
   UNAUTHORIZED,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 // Get all Users
 
