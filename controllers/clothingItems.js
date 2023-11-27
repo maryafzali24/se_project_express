@@ -11,7 +11,7 @@ const createItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, likes, owner: req.user._id })
     .then((item) => {
-      send({ data: item });
+      res.send({ data: item });
     })
     .catch((err) => {
       if (err.name === "ValidationError")
@@ -48,9 +48,13 @@ const deleteItem = (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
+      if (!item) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+
       if (!item.owner.equals(userId)) {
         return res
           .status(FORBIDDEN)

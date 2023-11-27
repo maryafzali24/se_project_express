@@ -1,11 +1,12 @@
-const user = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const users = require("../models/user");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT,
   UNAUTHORIZED,
+  CONFLICT,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -13,8 +14,8 @@ const { JWT_SECRET } = require("../utils/config");
 
 // Get user by _id
 const getCurrentUsers = (req, res) => {
-  const { userId } = req.params;
-  user
+  const userId = req.user._id;
+  users
     .findById(userId)
     .orFail()
     // return the found data to the user
@@ -42,7 +43,7 @@ const createUser = (req, res) => {
       .status(BAD_REQUEST)
       .send({ message: "Email and password are required." });
   }
-  return user
+  return users
     .findOne({ email })
     .then((user) => {
       if (user) {
@@ -50,7 +51,7 @@ const createUser = (req, res) => {
       }
       return bcrypt.hash(password, 10);
     })
-    .then((hash) => user.create({ name, avatar, email, password: hash }))
+    .then((hash) => users.create({ name, avatar, email, password: hash }))
     .then((newUser) =>
       res.send({
         name: newUser.name,
@@ -60,10 +61,8 @@ const createUser = (req, res) => {
     )
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid request (createUser)" });
+      if (err.message === "User already exists") {
+        return res.status(CONFLICT).send({ message: "User already exists" });
       }
       return res.status(DEFAULT).send({ message: "Server error (createUser)" });
     });
@@ -71,11 +70,10 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
-  const { userId } = req.params;
 
-  return user
+  return users
     .findByIdAndUpdate(
-      userId,
+      req.user._id,
       { name, avatar },
       { new: true, runValidators: true },
     )
@@ -85,7 +83,7 @@ const updateUser = (req, res) => {
       }
       return res.send({ data: user });
     })
-    .catch(() => {
+    .catch((err) => {
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST)
@@ -101,7 +99,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   return (
-    user
+    users
       .findUserByCredentials(email, password)
       // authentication successful! user is in the user variable
       .then((user) => {
