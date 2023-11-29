@@ -61,9 +61,10 @@ const createUser = (req, res) => {
     )
 
     .catch((err) => {
-      if (err.message === "User already exists") {
+      if (err.name === "ValidationError") {
         return res.status(CONFLICT).send({ message: "User already exists" });
       }
+
       return res.status(DEFAULT).send({ message: "Server error (createUser)" });
     });
 };
