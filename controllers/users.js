@@ -62,6 +62,12 @@ const createUser = (req, res) => {
 
     .catch((err) => {
       if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid request for (Creating user)" });
+      }
+
+      if (err.message === "User already exists") {
         return res.status(CONFLICT).send({ message: "User already exists" });
       }
 
