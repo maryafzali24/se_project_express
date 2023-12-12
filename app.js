@@ -8,14 +8,16 @@ const { PORT = 3001 } = process.env;
 const app = express();
 app.use(helmet());
 
-mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
-// mongoose.connect(
-//   "mongodb://127.0.0.1:27017/wtwr_db",
-//   (r) => {
-//     console.log("connected to DB", r);
-//   },
-//   (e) => console.log("DB error", e),
-// );
+mongoose.set("strictQuery", true);
+// mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
+mongoose.connect(
+  "mongodb://127.0.0.1:27017/wtwr_db",
+  (r) => {
+    console.log("connected to DB", r);
+  },
+  (e) => console.log("DB error", e),
+);
+
 const routes = require("./routes");
 
 app.use(cors());
