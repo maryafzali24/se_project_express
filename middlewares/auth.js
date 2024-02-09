@@ -7,7 +7,9 @@ const auth = (req, res, next) => {
 
   // let's check the header exists and starts with 'Bearer '
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(UNAUTHORIZED).send({ message: "Authorization required" });
+    return res
+      .status(UNAUTHORIZED)
+      .send({ message: "Authorization is just required" });
   }
 
   const token = authorization.replace("Bearer ", "");
