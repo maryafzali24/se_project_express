@@ -1,3 +1,6 @@
-module.exports = {
-  JWT_SECRET: "your-secret",
-};
+// module.exports = {
+//   JWT_SECRET: "your-secret",
+// };
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+module.exports = { NODE_ENV, JWT_SECRET };
