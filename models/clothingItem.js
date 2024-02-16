@@ -30,13 +30,7 @@ const clothingItem = new mongoose.Schema({
     ref: "user",
     required: "Url  cannot be empty",
   },
-  // a list of users who liked the item, an ObjectId array with a reference to the user modal (empty by default)
-  // likes: [
-  //   {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "user",
-  //   },
-  // ],
+
   likes: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     default: [],

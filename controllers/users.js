@@ -1,53 +1,38 @@
+require("dotenv").config;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const users = require("../models/user");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  UNAUTHORIZED,
-  CONFLICT,
-} = require("../utils/errors");
-const { JWT_SECRET } = require("../utils/config");
+const { NODE_ENV, JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../errors/bad-request-err");
+const ConflictError = require("../errors/conflict-err");
+const NotFoundError = require("../errors/not-found-err");
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 // Get all Users
 
 // Get user by _id
-const getCurrentUsers = (req, res) => {
+const getCurrentUsers = (req, res, next) => {
   const userId = req.user._id;
   users
     .findById(userId)
-    .orFail()
-    // return the found data to the user
+    .orFail(() => new NotFoundError("User Not Found"))
     .then((userData) => {
-      res.send({ data: userData });
-    })
-    // if the record was not found, display an error message
-    .catch((err) => {
-      if (err.name === "ValidationError" || err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Not a valid Id" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "User not found" }); // Change the status to 404 if the user is not found
-      }
-      return res.status(DEFAULT).send({ message: "Server error (getUserId)" });
+      res.send({ data: userData }).catch(next);
     });
 };
 
 // Create a new user
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required." });
+    return next(new BadRequestError("Email and password are required!"));
   }
   return users
     .findOne({ email })
     .then((user) => {
       if (user) {
-        throw new Error("User already exists");
+        return next(new ConflictError("User already exists"));
       }
       return bcrypt.hash(password, 10);
     })
@@ -62,20 +47,14 @@ const createUser = (req, res) => {
 
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid request for (Creating user)" });
+        next(new BadRequestError("Invalid request for (Creating user)"));
+      } else {
+        next(err);
       }
-
-      if (err.message === "User already exists") {
-        return res.status(CONFLICT).send({ message: "User already exists" });
-      }
-
-      return res.status(DEFAULT).send({ message: "Server error (createUser)" });
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
   return users
@@ -86,44 +65,37 @@ const updateUser = (req, res) => {
     )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        throw new NotFoundError("User not found");
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid request for (Updating user)" });
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "Server errors for (updating user)" });
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  return (
-    users
-      .findUserByCredentials(email, password)
-      // authentication successful! user is in the user variable
-      .then((user) => {
-        // creating a token
-        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+  return users
+    .findUserByCredentials(email, password)
+    .then((user) => {
+      // creating a token
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === "production" ? JWT_SECRET : JWT_SECRET,
+        {
           expiresIn: "7d",
-        });
-        res.send({ token });
-      })
+        },
+      );
+      res.send({ token });
+    })
 
-      .catch(() => {
-        // authentication error
-        res
-          .status(UNAUTHORIZED)
-          .send({ message: "Incorrect email or password" });
-      })
-  );
+    .catch(() => next(new UnauthorizedError("Incorrect email or password")));
 };
 
 module.exports = { getCurrentUsers, createUser, updateUser, login };

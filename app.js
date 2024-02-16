@@ -4,30 +4,49 @@ const helmet = require("helmet");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { login, createUser } = require("./controllers/users");
+const errorHandler = require("./middlewares/error-handler");
+const { errors } = require("celebrate");
+const { validateUserBody, validateLogin } = require("./middlewares/validation");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const { PORT = 3001 } = process.env;
 const app = express();
 app.use(helmet());
 
 mongoose.set("strictQuery", true);
-// mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
-mongoose.connect(
-  "mongodb://127.0.0.1:27017/wtwr_db",
-  (r) => {
-    console.log("connected to DB", r);
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+mongoose.connect(MONGODB_URI).then(
+  () => {
+    console.log("DB is connected");
   },
-  (e) => console.log("DB error", e),
+  (e) => console.log("DB ERROR", e),
 );
 
 const routes = require("./routes");
 
 app.use(cors());
+
 app.use(express.json());
 
-app.post("/signin", login);
-app.post("/signup", createUser);
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
+app.post("/signin", validateLogin, login);
+
+app.post("/signup", validateUserBody, createUser);
+
+app.use(requestLogger);
 
 app.use(routes);
+
+app.use(errorLogger); //enabling the error logger
+
+app.use(errors()); // celebrate error handler
+
+app.use(errorHandler); // centralized error handler
 
 app.listen(PORT, () => {
   // if everything works fine, the console will show which port the application is listening to

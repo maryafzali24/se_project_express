@@ -2,6 +2,9 @@
 
 The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
 
+DOMAIN LINK:
+Access live application here: https://wtwr.home.kg
+
 ## Functionality
 
 1. API Endpoints: Various CRUD (Create, Read. Update, Delete) operations for interacting with clothing items and user data.
@@ -17,16 +20,15 @@ The back-end project is focused on creating a server for the WTWR application. Y
    JWT (JSON Web Tokens): Implementing JWT for secure user authentication and to maintain session integrity.
    Helmet: Utilizing Helmet to set various HTTP headers for app protection.
    CORS (Cross-Origin Resource Sharing): Enabling CORS to allow for secure and controlled access to the server resources from different domains.
+   Joi & Celebrate: Additional layers of data validation.
+   5.GCP (Google Cloud Platform): For powerful and scalable cloud hosting.
+5. Winston Logging: Efficient error tracking and application monitoring.
 
 ## Running the Project
 
 `npm run start` — to launch the server
 
 `npm run dev` — to launch the server with the hot reload feature
-
-### Testing
-
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
 
 ## Updates and Security Enhancements
 
