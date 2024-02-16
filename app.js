@@ -3,9 +3,10 @@ const express = require("express");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 const { login, createUser } = require("./controllers/users");
 const errorHandler = require("./middlewares/error-handler");
-const { errors } = require("celebrate");
+
 const { validateUserBody, validateLogin } = require("./middlewares/validation");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
@@ -33,16 +34,15 @@ app.get("/crash-test", () => {
     throw new Error("Server will crash now");
   }, 0);
 });
+app.use(requestLogger);
 
 app.post("/signin", validateLogin, login);
 
 app.post("/signup", validateUserBody, createUser);
 
-app.use(requestLogger);
-
 app.use(routes);
 
-app.use(errorLogger); //enabling the error logger
+app.use(errorLogger); // enabling the error logger
 
 app.use(errors()); // celebrate error handler
 

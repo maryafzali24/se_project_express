@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const ClothingItem = require("../models/clothingItem");
+const ClothingItem = require("../models/clothingitem");
 const BadRequestError = require("../errors/bad-request-err");
 const NotFoundError = require("../errors/not-found-err");
 const ForbiddenError = require("../errors/forbidden-err");
@@ -26,18 +26,6 @@ const getItems = (req, res, next) => {
     .catch(next);
 };
 
-// const updateItem = (req, res) => {
-//   const { itemId } = req.params;
-//   const { imageURL } = req.body;
-//   clothingItem
-//     .findByIdAndUpdate(itemId, { $set: { imageURL } })
-//     .orFail()
-//     .then((item) => res.status(200).send({ data: item }))
-//     .catch((e) => {
-//       res.status(500).send({ message: " Error from updateItem", e });
-//     });
-// };
-
 const deleteItem = (req, res, next) => {
   const userId = req.user._id;
   const { itemId } = req.params;
@@ -47,7 +35,6 @@ const deleteItem = (req, res, next) => {
   }
 
   ClothingItem.findById(itemId)
-    .orFail()
     .then((item) => {
       if (!item) {
         return next(new NotFoundError("Item Does Not Exist!"));
@@ -60,9 +47,11 @@ const deleteItem = (req, res, next) => {
           ),
         );
       }
-      return ClothingItem.findByIdAndDelete(itemId);
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.send({ data: itemId }),
+      );
     })
-    .then(() => res.send({ data: itemId }))
+
     .catch(next);
 };
 
