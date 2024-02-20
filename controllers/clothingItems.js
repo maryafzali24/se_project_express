@@ -34,7 +34,7 @@ const deleteItem = (req, res, next) => {
     return next(new BadRequestError("Invalid Item ID"));
   }
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return next(new NotFoundError("Item Does Not Exist!"));
