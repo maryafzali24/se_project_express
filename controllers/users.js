@@ -7,7 +7,7 @@ const ConflictError = require("../errors/conflict-err");
 const NotFoundError = require("../errors/not-found-err");
 const UnauthorizedError = require("../errors/unauthorized-err");
 
-// require("dotenv").config;
+require("dotenv").config;
 
 // Get all Users
 
