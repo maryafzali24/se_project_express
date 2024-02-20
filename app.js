@@ -19,9 +19,9 @@ mongoose.set("strictQuery", true);
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
 mongoose.connect(MONGODB_URI).then(
   () => {
-    console.log("DB is connected");
+    // console.log("DB is connected");
   },
-  (e) => console.log("DB ERROR", e),
+  // (e) => console.log("DB ERROR", e),
 );
 
 const routes = require("./routes");
